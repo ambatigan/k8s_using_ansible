@@ -1,0 +1,10 @@
+[masters]
+master ansible_host=192.168.195.16 ansible_user=root
+
+[workers]
+worker1 ansible_host=192.168.195.17 ansible_user=root
+worker2 ansible_host=192.168.195.18 ansible_user=root
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
