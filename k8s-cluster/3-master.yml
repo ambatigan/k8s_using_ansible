@@ -1,23 +1,10 @@
 - hosts: master
   become: yes
   tasks:
-    - name: 'Configure cgroup driver used by kubelet on Master node'
-      become: yes
-      replace:
-        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-        regexp: 'cgroup-driver=systemd'
-        replace: 'cgroup-driver="cgroupfs"'
-        backup: yes
-
-    - name: 'Reload configs and restart kubelet'
-      become: yes
-      systemd:
-        state: restarted
-        daemon_reload: yes
-        name: kubelet
-
     - name: initialize the cluster
-      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --network-plugin=cni >> cluster_initialized.txt
+      become: yes
+      become_user: root
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
       args:
         chdir: $HOME
         creates: cluster_initialized.txt
@@ -37,10 +24,47 @@
         remote_src: yes
         owner: ubuntu
 
+    - name: giving permissions to the required file
+      shell: chown $(id -u):$(id -g) $HOME/.kube/config >> giving_permissions.txt
+      args:
+        chdir: $HOME
+        creates: giving_permissions.txt
+
+    - name: 'Copy dns yml to master node'
+      copy:
+        src: ./kube_dns.yml
+        dest: $HOME/kube_dns.yml
+        owner: ubuntu
+        mode: 0755
+        force: no
+
+    - name: 'Install dns yml'
+      become: yes
+      become_user: ubuntu
+      shell: kubectl create configmap kube-dns --from-file=$HOME/kube_dns.yml --namespace=kube-system >> $HOME/kube_dns_setup.txt
+      args:
+       chdir: $HOME
+       creates: $HOME/kube_dns_setup.txt
+
     - name: install Pod network
       become: yes
       become_user: ubuntu
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml >> pod_network_setup.txt
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml >> pod_network_setup.txt
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
+
+    - name: 'Configure cgroup driver used by kubelet on Master node'
+      become: yes
+      replace:
+        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        regexp: 'cgroup-driver=systemd'
+        replace: 'cgroup-driver="cgroupfs"'
+        backup: yes
+
+    - name: 'Reload configs and restart kubelet'
+      become: yes
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: kubelet
