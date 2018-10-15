@@ -1,0 +1,40 @@
+- hosts: all
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Reset cluster
+    command: /usr/bin/kubeadm reset -f
+
+  - name: check that the /root/cluster_initialized exists
+    stat:
+      path: /root/cluster_initialized.txt
+    register: stat_result
+
+  - name: delete the file, if it exist already
+    file:
+      path: /root/cluster_initialized.txt
+      state: absent
+    when: stat_result.stat.exists == True
+
+  - name: check that the /home/ubuntu/.kube/ exists
+    stat:
+      path: /home/ubuntu/.kube/
+    register: stat_result
+
+  - name: delete the directory, if it exist already
+    file:
+      path: /home/ubuntu/.kube/
+      state: absent
+    when: stat_result.stat.exists == True
+
+  - name: check that the /root/node_joined.txt exists
+    stat:
+      path: /root/node_joined.txt
+    register: stat_result
+
+  - name: delete the file, if it exist already
+    file:
+      path: /root/node_joined.txt
+      state: absent
+    when: stat_result.stat.exists == True
