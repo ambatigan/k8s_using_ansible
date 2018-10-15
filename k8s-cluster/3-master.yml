@@ -25,6 +25,8 @@
         owner: ubuntu
 
     - name: giving permissions to the required file
+      become: yes
+      become_user: ubuntu
       shell: chown $(id -u):$(id -g) $HOME/.kube/config >> giving_permissions.txt
       args:
         chdir: $HOME
