@@ -18,3 +18,27 @@
       args:
         chdir: $HOME
         creates: node_joined.txt
+
+    - name: Create config folder for Flannel Network 10-flannel.conf
+      become: yes
+      become_user: root
+      file:
+       path: /etc/cni/net.d
+       state: directory
+       owner: root
+       group: root
+       mode: 0777
+
+    - name: create Config file for Flannel Network 10-flannel.conf
+      become: yes
+      become_user: root
+      copy:
+        dest: "/etc/cni/net.d/10-flannel.conf"
+        content: |
+           {
+            "name": "cbr0",
+            "type": "flannel",
+            "delegate": {
+              "isDefaultGateway": true
+            }
+           }
