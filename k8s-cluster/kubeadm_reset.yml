@@ -28,6 +28,28 @@
       state: absent
     when: stat_result.stat.exists == True
 
+  - name: check that the /home/ubuntu/kube_dns.yml exists
+    stat:
+      path: /home/ubuntu/kube_dns.yml
+    register: stat_result
+
+  - name: delete the giving kube_dns.yml file, if it exist already
+    file:
+      path: /home/ubuntu/kube_dns.yml
+      state: absent
+    when: stat_result.stat.exists == True
+
+  - name: check that the /home/ubuntu/kube_dns_setup.txt exists
+    stat:
+      path: /home/ubuntu/kube_dns_setup.txt
+    register: stat_result
+
+  - name: delete the giving kube_dns_setup.txt file, if it exist already
+    file:
+      path: /home/ubuntu/kube_dns_setup.txt
+      state: absent
+    when: stat_result.stat.exists == True
+
   - name: check that the /home/ubuntu/.kube/ exists
     stat:
       path: /home/ubuntu/.kube/
