@@ -33,6 +33,8 @@
         creates: giving_permissions.txt
 
     - name: 'Copy dns yml to master node'
+      become: yes
+      become_user: ubuntu
       copy:
         src: ./kube_dns.yml
         dest: $HOME/kube_dns.yml
