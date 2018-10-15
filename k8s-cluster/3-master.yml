@@ -58,6 +58,30 @@
         chdir: $HOME
         creates: pod_network_setup.txt
 
+    - name: Create cni net.d config folder for Flannel Network
+      become: yes
+      become_user: root
+      file:
+       path: /etc/cni/net.d
+       state: directory
+       owner: root
+       group: root
+       mode: 0777
+
+    - name: Put the content for the Flannel Network 10-flannel.conf
+      become: yes
+      become_user: root
+      copy:
+        dest: "/etc/cni/net.d/10-flannel.conf"
+        content: |
+           {
+            "name": "cbr0",
+            "type": "flannel",
+            "delegate": {
+              "isDefaultGateway": true
+            }
+           }    
+    
     - name: 'Configure cgroup driver used by kubelet on Master node'
       become: yes
       replace:
