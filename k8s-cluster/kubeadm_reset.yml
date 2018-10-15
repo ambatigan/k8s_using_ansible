@@ -17,6 +17,17 @@
       state: absent
     when: stat_result.stat.exists == True
 
+  - name: check that the /home/ubuntu/giving permissions txt exists
+    stat:
+      path: /home/ubuntu/giving_permissions.txt
+    register: stat_result
+
+  - name: delete the giving permissions txt file, if it exist already
+    file:
+      path: /home/ubuntu/giving_permissions.txt
+      state: absent
+    when: stat_result.stat.exists == True
+
   - name: check that the /home/ubuntu/.kube/ exists
     stat:
       path: /home/ubuntu/.kube/
